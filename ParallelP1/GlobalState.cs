@@ -19,16 +19,16 @@ namespace Parallel1
             MagazineSemaphores[(int)Resource.Sulfur] = new Semaphore(Constants.MaxSpace, Constants.MaxSpace);
 
             AlchemistTypes = new AlchemistTypeData[Constants.AlchemistTypesCount];
-            AlchemistTypes[0] = new AlchemistTypeData(AlchemistType.D, ChangeSemaphore, Resource.Lead, Resource.Mercury, Resource.Sulfur);
-            AlchemistTypes[1] = new AlchemistTypeData(AlchemistType.A, ChangeSemaphore, Resource.Lead, Resource.Mercury);
-            AlchemistTypes[2] = new AlchemistTypeData(AlchemistType.B, ChangeSemaphore, Resource.Sulfur, Resource.Mercury);
-            AlchemistTypes[3] = new AlchemistTypeData(AlchemistType.C, ChangeSemaphore, Resource.Lead, Resource.Sulfur);
+            AlchemistTypes[0] = new AlchemistTypeData(AlchemistType.D, this, Resource.Lead, Resource.Mercury, Resource.Sulfur);
+            AlchemistTypes[1] = new AlchemistTypeData(AlchemistType.A, this, Resource.Lead, Resource.Mercury);
+            AlchemistTypes[2] = new AlchemistTypeData(AlchemistType.B, this, Resource.Sulfur, Resource.Mercury);
+            AlchemistTypes[3] = new AlchemistTypeData(AlchemistType.C, this, Resource.Lead, Resource.Sulfur);
         }
 
-        public void CheckAndWake()
+        public void AllTypesCheckAndWake()
         {
             foreach (var type in AlchemistTypes)
-                type.CheckAndWake(ResourcesReady, MagazineSemaphores);
+                type.SingleTypeCheckAndWake(this);
         }
     }
 }

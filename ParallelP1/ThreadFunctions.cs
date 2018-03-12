@@ -9,41 +9,36 @@ namespace Parallel1
         public static void Factory(FactoryData data, int minTime, int maxTime, int seed)
         {
             var resource = (int)data.Resource;
-            var magazineSemaphore = data.GlobalState.MagazineSemaphores[resource];
-            var noCurseSemaphore = data.NoCurseSemaphore;
-            var changeSemaphore = data.GlobalState.ChangeSemaphore;
 
             var rand = new Random(seed);
             while (true)
             {
-                magazineSemaphore.WaitOne();
+                data.GlobalState.MagazineSemaphores[resource].WaitOne();
 
-                noCurseSemaphore.WaitOne();
-                noCurseSemaphore.Release();
+                data.NoCurseSemaphore.WaitOne();
+                data.NoCurseSemaphore.Release();
 
                 Thread.Sleep(rand.Next(minTime, maxTime));
 
-                changeSemaphore.WaitOne();
+                data.GlobalState.ChangeSemaphore.WaitOne();
                 data.GlobalState.ResourcesReady[resource]++;
                 Console.WriteLine("Produced " + data.Resource);
-                data.GlobalState.CheckAndWake();
-                changeSemaphore.Release();
+                data.GlobalState.AllTypesCheckAndWake();
+                data.GlobalState.ChangeSemaphore.Release();
             }
         }
 
-        public static void Alchemist(AlchemistTypeData data, int[] resourcesReady, Semaphore[] magazineSemaphores)
+        public static void Alchemist(GlobalState globalState, int alchemistType)
         {
-            data.WaitingCountSemaphore.WaitOne();
-            data.WaitingCount++;
-            data.WaitingCountSemaphore.Release();
-            Console.WriteLine("Alchemist of type " + data.Type + " started waiting.");
+            globalState.ChangeSemaphore.WaitOne();
+            var myAlchType = globalState.AlchemistTypes[alchemistType];
+            myAlchType.WaitingCount++;
+            myAlchType.SingleTypeCheckAndWake(globalState);
+            globalState.ChangeSemaphore.Release();
 
-            data.ChangeSemaphore.WaitOne();
-            data.CheckAndWake(resourcesReady, magazineSemaphores);
-            data.ChangeSemaphore.Release();
-
-            data.ResourcesWaitingSemaphore.WaitOne();
-            Console.WriteLine("Alchemist of type " + data.Type + " finished.");
+            Console.WriteLine("Alchemist of type " + myAlchType.Type + " started waiting.");
+            globalState.AlchemistTypes[alchemistType].ResourcesWaitingSemaphore.WaitOne();
+            Console.WriteLine("Alchemist of type " + myAlchType.Type + " finished.");
         }
 
         public static void Sorcerer(FactoryData[] data, int minTime, int maxTime, int seed)
@@ -92,7 +87,7 @@ namespace Parallel1
             }
         }
 
-        public static void AlchemistsSpawner(AlchemistTypeData[] data, int[] resourcesReady, Semaphore[] magazineSemaphores,
+        public static void AlchemistsSpawner(GlobalState globalState,
             int alchemistDelayMin, int alchemistDelayMax, int seed, Semaphore threadSemaphore, IList<Thread> threads)
         {
             var rand = new Random(seed);
@@ -101,10 +96,10 @@ namespace Parallel1
             {
                 Thread.Sleep(rand.Next(alchemistDelayMin, alchemistDelayMax));
                 var alchType = rand.Next(Constants.AlchemistTypesCount);
-                var alchemistThread = new Thread(() => Alchemist(data[alchType], resourcesReady, magazineSemaphores));
+                var alchemistThread = new Thread(() => Alchemist(globalState, alchType));
                 threadSemaphore.WaitOne();
-                alchemistThread.Start();
                 threads.Add(alchemistThread);
+                alchemistThread.Start();
                 threadSemaphore.Release();
             }
         }

@@ -7,15 +7,15 @@
         public const int AlchemistTypesCount = 4;
         public const int SorcerersCount = 3;
         public const int WarlocksCount = 3;
-        public const int FactoryMinTime = 2000;
-        public const int FactoryMaxTime = 10000;
+        public const int FactoryMinTime = 2250;
+        public const int FactoryMaxTime = 9000;
         public const int WarlockMinTime = 4000;
         public const int WarlockMaxTime = 20000;
         public const int SorcererMinTime = 12000;
         public const int SorcererMaxTime = 60000;
 
-        public const int AlchemistDelayMin = 1200;
-        public const int AlchemistDelayMax = 6000;
+        public const int AlchemistDelayMin = 1000;
+        public const int AlchemistDelayMax = 5000;
 
         public const int FactoryLeadSeed = 1;
         public const int FactoryMercurySeed = 2;

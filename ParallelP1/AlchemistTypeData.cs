@@ -5,28 +5,27 @@ namespace Parallel1
 {
     public class AlchemistTypeData
     {
-        public Semaphore ResourcesWaitingSemaphore = new Semaphore(0, int.MaxValue);
-        public Semaphore WaitingCountSemaphore = new Semaphore(1, 1);
-        public Semaphore ChangeSemaphore;
+        public Semaphore ResourcesWaitingSemaphore = new Semaphore(0, 1);
+        public GlobalState GlobalState;
         public int WaitingCount;
         public Resource[] ResourcesRequired;
         public AlchemistType Type;
 
-        public AlchemistTypeData(AlchemistType type, Semaphore changeSemaphore, params Resource[] resourcesRequired)
+        public AlchemistTypeData(AlchemistType type, GlobalState globalState, params Resource[] resourcesRequired)
         {
             ResourcesRequired = resourcesRequired;
             Type = type;
-            ChangeSemaphore = changeSemaphore;
+            GlobalState = globalState;
         }
 
-        public void CheckAndWake(int[] ResourcesReady, Semaphore[] magazineSemaphores)
+        public void SingleTypeCheckAndWake(GlobalState globalState)
         {
-            if (WaitingCount > 0 && ResourcesRequired.All(resource => ResourcesReady[(int)resource] > 0))
+            if (WaitingCount > 0 && ResourcesRequired.All(resource => globalState.ResourcesReady[(int)resource] > 0))
             {
                 foreach (int requiredResource in ResourcesRequired)
                 {
-                    ResourcesReady[requiredResource]--;
-                    magazineSemaphores[requiredResource].Release();
+                    globalState.ResourcesReady[requiredResource]--;
+                    globalState.MagazineSemaphores[requiredResource].Release();
                 }
 
                 WaitingCount--;

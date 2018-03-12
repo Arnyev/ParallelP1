@@ -17,8 +17,8 @@ namespace Parallel1
             var threads = new List<Thread>();
             var threadSemaphore = new Semaphore(1, 1);
 
-            var alchemistsSpawner = new Thread(() => ThreadFunctions.AlchemistsSpawner(globalState.AlchemistTypes, globalState.ResourcesReady,
-                globalState.MagazineSemaphores, Constants.AlchemistDelayMin, Constants.AlchemistDelayMax, Constants.AlchemistSpawnerSeed, threadSemaphore, threads));
+            var alchemistsSpawner = new Thread(() => ThreadFunctions.AlchemistsSpawner(globalState, 
+                Constants.AlchemistDelayMin, Constants.AlchemistDelayMax, Constants.AlchemistSpawnerSeed, threadSemaphore, threads));
 
             threads.AddRange(factories);
             threads.AddRange(sorcerers);
